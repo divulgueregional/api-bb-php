@@ -1,0 +1,17 @@
+{
+    "name": "divulgueregional/api-bb-php",
+    "description": "Gerar boletos do Banco do Brasil",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Divulgueregional\\ApiBbPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "divulgueregional",
+            "email": "rosenomatos@gmail.com"
+        }
+    ],
+    "require": {}
+}
