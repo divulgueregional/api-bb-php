@@ -1,7 +1,8 @@
 {
     "name": "divulgueregional/api-bb-php",
-    "description": "Gerar boletos do Banco do Brasil",
+    "description": "API para gerar boletos do Banco do Brasil",
     "license": "MIT",
+    "type": "library",
     "autoload": {
         "psr-4": {
             "Divulgueregional\\ApiBbPhp\\": "src/"
@@ -9,9 +10,12 @@
     },
     "authors": [
         {
-            "name": "divulgueregional",
+            "name": "Roseno Matos",
             "email": "rosenomatos@gmail.com"
         }
     ],
-    "require": {}
+    "minimum-stability": "dev",
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    }
 }
