@@ -16,7 +16,7 @@ composer update
 ```
 <b>Ou pela última tag: </b>
 ```php
-composer require divulgueregional/api-bb-php 1.0.2
+composer require divulgueregional/api-bb-php 1.0.1
 ```
 
 ## Documentação:
