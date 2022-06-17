@@ -5,8 +5,9 @@ O token pode ser gerado e guardado no banco e depois você pode colocar o token 
 
 ## Não quero guardar o token
 No config vai ter a opção de colocar 1 ou ''<br>
-1= a biblioteca vai gerar sempre um token novo
+1= a biblioteca vai gerar sempre um token <br>
 ''= você guarda e gerencia o token 
+
 ```php
 'tokenAutomatico' => 1,
 ```
