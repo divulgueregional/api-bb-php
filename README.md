@@ -2,11 +2,7 @@
 
 ## Introdução
 
-Projeto em construção.
-
-## Introdução
-
-Projeto completo utilizando comunicação e funcionalidades fornecidas pela API do Banco do Berasil. Essa biblioteca pode ser facilmente integrada ao seu software e/ou ERP.
+Esse projeto foi implementado as funcionalidades de COBRANÇA, utilizando comunicação e funcionalidades fornecidas pela API do Banco do Berasil. Essa biblioteca pode ser facilmente integrada ao seu software e/ou ERP.
 
 ## Como usar:
 <b>Instalação: </b>
@@ -20,7 +16,7 @@ composer update
 ```
 <b>Ou pela última tag: </b>
 ```php
-composer require divulgueregional/api-bb-php 1.0.1
+composer require divulgueregional/api-bb-php 1.0.2
 ```
 
 ## Documentação:
@@ -71,7 +67,7 @@ Acesse a pasta docs e leia o README.md
 
 - Incluir Autorização de Débito Automático. (Falta fazer)
 
-## >PAGAMENTOS EM LOTES
+## PAGAMENTOS EM LOTES
 <b>GPS</b><br>
 
 - Consultar uma Guia da Previdência Social específica. (Falta fazer)
@@ -121,7 +117,7 @@ Acesse a pasta docs e leia o README.md
 
 - Consultar um Pagamento Específico de um Lote de Boletos. (Falta fazer)
 - Efetuar Solicitação de Pagamentos em Lote de Boleto. (Falta fazer)
-- /lotes-boletos/{id}/solicitacaos. (Falta fazer)
+- Consultar Solicitação de um Lote de Pagamentos via Boletos. (Falta fazer)
 - Consultar Pagamentos. (Falta fazer)
 
 
