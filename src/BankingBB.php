@@ -23,7 +23,7 @@ class BankingBB{
             $this->urls = 'https://api.bb.com.br/cobrancas/v2';
             $this->urlToken = 'https://oauth.bb.com.br/oauth/token';
             //GuzzleHttp
-            $this->uriToken = 'https://oauth.sandbox.bb.com.br';
+            $this->uriToken = 'https://oauth.bb.com.br/oauth/token';
             $this->uriCobranca = 'https://api.bb.com.br';
         }else{
             $this->urls = 'https://api.sandbox.bb.com.br/cobrancas/v2';
