@@ -16,7 +16,7 @@ Cobrança - Dados fictícios para Testes
         'client_secret' => '',
         'application_key' => '',
         'numeroConvenio' => '3128557',
-        'tokenAutomatico' => 1,//1- gera o token novo a cada requisição; vazio- você gera o token, guarda e seta ele
+        'token' => $token,//vazio- um token novo será gerado a cada requisição;
     ];
 
     //gerar o token ou setToken

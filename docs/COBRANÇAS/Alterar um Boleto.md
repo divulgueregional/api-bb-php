@@ -13,7 +13,7 @@ Altera algumas informações de um boleto gerado.
         'client_id' => '',
         'client_secret' => '',
         'application_key' => '',
-        'tokenAutomatico' => 1,//1- gera o token novo a cada requisição; vazio- você gera o token, guarda e seta ele
+        'token' => $token,//vazio- um token novo será gerado a cada requisição;
     ];
 
     //ALTERAR BOLETO

@@ -38,9 +38,14 @@ class BankingBB{
         $this->clientCobranca = new Client([
             'base_uri' => $this->uriCobranca,
         ]);
-        //token automático
-        if($this->config['tokenAutomatico']==1){
-            $this->gerarToken();
+        
+        //startar o token
+        if(isset($this->config['token'])){
+            if($this->config['token'] !=''){
+                $this->setToken($this->config['token']);
+            }else{
+                $this->gerarToken();
+            }
         }
     }
 

@@ -14,7 +14,7 @@ Mostra todos os dados que estão em um boleto gerado.
         'client_secret' => '',
         'application_key' => '',
         'numeroConvenio' => '3128557',
-        'tokenAutomatico' => 1,//1- gera o token novo a cada requisição; vazio- você gera o token, guarda e seta ele
+        'token' => $token,//vazio- um token novo será gerado a cada requisição;
     ];
 
     //DETALHA UM DO BOLETO

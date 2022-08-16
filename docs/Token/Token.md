@@ -9,7 +9,7 @@ Obter token oAuth
     use Divulgueregional\ApiBbPhp\BankingBB;
 
     $config = [
-        'endPoints' => 2, //1-Produção; 2- Homologação
+        'endPoints' => 1, //1-Produção; 2- Homologação
         'client_id' => '',
         'client_secret' => '',
         'application_key' => '',
