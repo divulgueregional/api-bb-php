@@ -23,9 +23,9 @@ Baixa um boleto gerado. O codigoEstadoTituloCobranca ficará = 7
     try {
         $BankingBB = new BankingBB($config);
         
-        $baixaBoleto = $BankingBB->baixaBoleto($nossonumero);
+        $resp = $BankingBB->baixarBoleto($nossonumero);
         echo "<pre>";
-        print_r($baixaBoleto);
+        print_r($resp);
 
     } catch (\Exception $e) {
         echo $e->getMessage();

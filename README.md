@@ -16,7 +16,7 @@ composer update
 ```
 <b>Ou pela última tag: </b>
 ```php
-composer update divulgueregional/api-bb-php 1.0.3
+composer update divulgueregional/api-bb-php 1.0.4
 ```
 
 ## Documentação:
@@ -32,7 +32,8 @@ Acesse a pasta docs e leia o README.md
 - Detalhar um boleto
 - Alterar dados de um boleto
 - Baixar Boleto
-- Listar Boletos (falta fazer)
+- Boleto Em PDF (Fazendo)
+- Listar Boletos
 - Consultar pix de um boleto
 - Cancelar pix de um boleto
 - Gerar pix de um boleto (Falta fazer)
