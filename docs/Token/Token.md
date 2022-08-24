@@ -47,6 +47,33 @@ Segue um exemplo simples que auxilia uma forma de verificar o tempo do token gua
 Caso não atualizar a data e hora, sempre vai gerar um token novo
 
 ```php
+private function vakidadeToken($bb){
+    if($bb->bb_token_dia == date('Y-m-d')){
+        //data válida, verificar horário
+        $hora_decorridas = gmdate('H:i:s', strtotime(date('H:i:s')) - strtotime($bb->bb_token_hora));
+        $hora_min = explode(":", $hora_decorridas);
+        if($hora_min[0] == '00'){
+            if ($hora_min[1] < '08') 
+            {
+                return $bb->bb_token;
+            } else {
+                //passou de 56 min, gerar novo token
+                return $this->gerarToken($bb);
+            }
+        }else{
+            //passou de 1 hora, gerar token
+            return $this->gerarToken($bb);
+        }
+    }else{
+        //data inválida, gerar token
+        return $this->gerarToken($bb);
+    }
+}
+```
+## Controle do Token
+Outro Exemplo
+
+```php
     date_default_timezone_set('America/Sao_Paulo');
     $BankingBB = new BankingBB($config);
     $hoje = date('Y-m-d');
