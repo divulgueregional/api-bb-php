@@ -32,7 +32,7 @@ Acesse a pasta docs e leia o README.md
 - Detalhar um boleto
 - Alterar dados de um boleto
 - Baixar Boleto
-- Boleto Em PDF (Fazendo)
+- Boleto Em PDF (Em Produção)
 - Listar Boletos
 - Consultar pix de um boleto
 - Cancelar pix de um boleto
