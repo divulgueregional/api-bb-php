@@ -233,48 +233,42 @@ class BankingBB{
         }
     }
 
-    public function listarBoleto($filters){
-        $this->headers([
-            "Authorization"     => "Bearer " . $this->getToken()->access_token,
-            "X-Developer-Application-Key" => $this->config['application_key']
-        ]);
-        $get = 'gw-dev-app-key='.$this->config['application_key'];
-
-        $inicial = "&dataInicioVencimento>={$filters['dataInicioVencimento']}";
-        $final = "&dataFimVencimento={$filters['dataFimVencimento']}";
-        if($filters['boletoVencido']=='S'){
-            //vencidos: colocar a opção da data incicial do vencimento, senão vai pegar todos
-            $inicial = "";//&dataInicioVencimento={$dbb->dataInicioVencimento}
-            $final = '';
-            // $final = date("d.m.Y");
-        }else{
-            //não está vencido
-            $inicial = "&dataInicioVencimento=01.04.2022";
-            $final = '&dataFimVencimento=30.08.2022';
-            $inicial = '';
-            $final = '';
+    public function listarBoletos($filters){
+        try {
+            $response = $this->clientCobranca->request(
+                'GET',
+                "/cobrancas/v2/boletos",
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'Bearer ' . $this->token.''
+                    ],
+                    'verify' => false,
+                    'query' => [
+                        'gw-dev-app-key' => $this->config['application_key'],
+                        'indicadorSituacao' => $filters['indicadorSituacao'],
+                        'agenciaBeneficiario' => $filters["agenciaBeneficiario"],
+                        'contaBeneficiario' => $filters["contaBeneficiario"],
+                        'cnpjPagador'=> '',
+                        'digitoCNPJPagador'=> '',
+                        'digitoCNPJPagador'=> '',
+                        'codigoEstadoTituloCobranca' => $filters['codigoEstadoTituloCobranca'],
+                        'boletoVencido' => $filters['boletoVencido'],
+                    ],
+                ]
+            );
+            $statusCode = $response->getStatusCode();
+            $result = json_decode($response->getBody()->getContents());
+            return array('status' => $statusCode, 'response' => $result);
+        } catch (ClientException $e) {
+            return ($e);
+        } catch (\Exception $e) {
+            $response = $e->getMessage();
+            return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
-        $status="&codigoEstadoTituloCobranca=1";
-        $status='';
-        $curl = curl_init(("https://api.bb.com.br/cobrancas/v2/boletos?{$get}&indicadorSituacao=A&agenciaBeneficiario={$filters['agenciaBeneficiario']}&contaBeneficiario={$filters['contaBeneficiario']}&boletoVencido={$filters['boletoVencido']}{$status}{$inicial}{$final}"));
-        curl_setopt_array($curl,[
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_POSTFIELDS => [],
-            CURLOPT_HTTPHEADER => ($this->headers),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLINFO_HEADER_OUT => true
-        ]);
-        
-        $data = json_decode(curl_exec($curl));
-        
-        return $data;
     }
 
-    public function baixaBoleto(string $id)
+    public function baixarBoleto(string $id)
     {
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
