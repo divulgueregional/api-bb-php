@@ -3,9 +3,14 @@
 ## Altera os dados de um boleto
 Altera algumas informações de um boleto gerado.
 
+## Regras
+1- Só pode alterar uma boleto após 30 minutos de seu registro.<br>
+2- Boleto alterado. Só pode alterar novamente após 30 minutos da sua última alteração.<br>
+3- Guarde a data e hora de inclusão para quando alterar poder verificar se está no tempo hábil para poder fazer a alteração.
+4- Guarde a data e hora da alteração para quando alterar novamente poder verificar se está no tempo hábil para poder fazer a nova alteração.
+
 ```php
     require_once './api-bb-php/vendor/autoload.php';
-
     use Divulgueregional\ApiBbPhp\BankingBB;
 
     $config = [
@@ -15,10 +20,10 @@ Altera algumas informações de um boleto gerado.
         'application_key' => '',
         'token' => $token,//vazio- um token novo será gerado a cada requisição;
     ];
+    $BankingBB = new BankingBB($config);
 
     //ALTERAR BOLETO
     $nossonumero = '00031285570000150019';//Número do título de cobrança.
-
     $dadosAlterar = [
         "numeroConvenio" => 3128557,
         "indicadorNovaDataVencimento" => 'S',// obrigatorio
@@ -116,13 +121,13 @@ Altera algumas informações de um boleto gerado.
     // print_r($dadosAlterar);die;
 
     try {
-        $BankingBB = new BankingBB($config);
-        
         $alterarBoleto = $BankingBB->alterarBoleto($nossonumero, $dadosAlterar);
         echo "<pre>";
         print_r($alterarBoleto);
-
     } catch (\Exception $e) {
         echo $e->getMessage();
-    }  
+    }
 ```
+
+## Verificar prazo 30 minutos
+Arquivo Prazo 30 miutos<br>
