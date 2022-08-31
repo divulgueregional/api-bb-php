@@ -142,7 +142,12 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $response = $e->getResponse();
+            $responseBodyAsString = json_decode($response->getBody()->getContents());
+            if($responseBodyAsString==''){
+                return ($response);
+            }
+            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao incluir Boleto Cobranca: {$response}"];
@@ -173,36 +178,13 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $response = $e->getResponse();
+            $responseBodyAsString = json_decode($response->getBody()->getContents());
+            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao alterar Boleto Cobranca: {$response}"];
         }
-    }
-
-    public function alterarBoleto2($id, array $fields){
-        $this->headers([
-            "Authorization"     => "Bearer " . $this->token,
-            "Content-Type"      => "application/json",
-            "X-Developer-Application-Key" => $this->config['application_key']
-        ]);
-        $this->fields($fields,'json');
-        
-        $curl = curl_init("{$this->urls}/boletos/{$id}?gw-dev-app-key=d27be77909ffab001369e17d80050056b9b1a5b0");
-        curl_setopt_array($curl,[
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "PATCH",
-            CURLOPT_POSTFIELDS => $this->fields,
-            CURLOPT_HTTPHEADER => ($this->headers),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLINFO_HEADER_OUT => true
-        ]);
-        
-        $boletoAlterado = json_decode(curl_exec($curl));
-        return $boletoAlterado;
     }
 
     public function detalheDoBoleto(string $id)
@@ -226,7 +208,9 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $response = $e->getResponse();
+            $responseBodyAsString = json_decode($response->getBody()->getContents());
+            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao detalhar Boleto Cobranca: {$response}"];
@@ -289,7 +273,12 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $response = $e->getResponse();
+            $responseBodyAsString = json_decode($response->getBody()->getContents());
+            if($responseBodyAsString==''){
+                return ($response);
+            }
+            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
