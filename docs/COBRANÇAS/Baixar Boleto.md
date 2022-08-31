@@ -31,3 +31,7 @@ Baixa um boleto gerado. O codigoEstadoTituloCobranca ficará = 7
         echo $e->getMessage();
     }  
 ```
+
+
+## Verificar prazo 30 minutos
+Arquivo Prazo 30 miutos<br>
