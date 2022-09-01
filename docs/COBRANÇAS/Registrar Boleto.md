@@ -104,3 +104,12 @@ Cobrança - Dados fictícios para Testes
         echo $e->getMessage();
     }   
 ```
+
+## OBSERVAÇÃO
+Tem diferença no status de retorno em homologação e produção.<br>
+```php
+//após registrar o boleto em homologação retorna
+['status']=200
+//após registrar o boleto em produção retorna
+['status']=201
+```
