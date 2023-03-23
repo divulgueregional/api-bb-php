@@ -1,6 +1,6 @@
 # BOLETO PDF-BB
 
-## Boleto em PDF fase de teste
+## Boleto em PDF
 A API do Banco do Brasil não fornece um PDF de boleto pronto.<br>
 Foi feito um layout usando o DomPDF para gerar o PDF.<br>
 
