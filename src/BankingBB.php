@@ -11,7 +11,15 @@ use JetBrains\PhpStorm\NoReturn;
 class BankingBB{
     protected $urlToken;
     protected $header;
-    // protected $token;
+    protected $token;
+    protected $config;
+    protected $urls;
+    protected $uriToken;
+    protected $uriCobranca;
+    protected $clientToken;
+    protected $clientCobranca;
+    protected $fields;
+    protected $headers;
     // protected $optionsRequest = [];
 
     private $client;
@@ -53,8 +61,7 @@ class BankingBB{
     ############## TOKEN #################################
     ######################################################
 
-    public function gerarToken()
-    {
+    public function gerarToken(){
         try {
             $response = $this->clientToken->request(
                 'POST',
@@ -119,8 +126,7 @@ class BankingBB{
     ######################################################
     ############## COBRANÇAS #############################
     ######################################################
-    public function registrarBoleto(array $fields)
-    {
+    public function registrarBoleto(array $fields){
         try {
             $response = $this->clientCobranca->request(
                 'POST',
@@ -154,8 +160,7 @@ class BankingBB{
         }
     }
 
-    public function alterarBoleto(string $id, array $fields)
-    {
+    public function alterarBoleto(string $id, array $fields){
         try {
             $response = $this->clientCobranca->request(
                 'PATCH',
@@ -187,8 +192,7 @@ class BankingBB{
         }
     }
 
-    public function detalheDoBoleto(string $id)
-    {
+    public function detalheDoBoleto(string $id){
         try {
             $response = $this->clientCobranca->request(
                 'GET',
@@ -252,8 +256,7 @@ class BankingBB{
         }
     }
 
-    public function baixarBoleto(string $id)
-    {
+    public function baixarBoleto(string $id){
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -285,8 +288,7 @@ class BankingBB{
         }
     }
 
-    public function consultaPixBoleto(string $id)
-    {
+    public function consultaPixBoleto(string $id){
         try {
             $response = $this->clientCobranca->request(
                 'GET',
@@ -314,8 +316,7 @@ class BankingBB{
         }
     }
 
-    public function cancelarPixBoleto(string $id)
-    {
+    public function cancelarPixBoleto(string $id){
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -345,8 +346,7 @@ class BankingBB{
         }
     }
     
-    public function gerarPixBoleto(string $id)
-    {
+    public function gerarPixBoleto(string $id){
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -421,55 +421,55 @@ class BankingBB{
     ############## PAGAMENTOS ############################
     ######################################################
     public function pagarBoletoLinha(string $linhaDigitavel){
-        $this->headers([
-            "accept"            => "application/json",
-            // "Content-Type"      => "application/json",
-            // "Authorization"     => "Bearer " . $this->getToken()->access_token,
-            // "X-Developer-Application-Key" => $this->config['application_key']
-        ]);
-        //falta colocar produção
-        $curl = curl_init("https://api.hm.bb.com.br/testes-portal-desenvolvedor/v1/boletos-cobranca/{$linhaDigitavel}/pagar?gw-app-key={$this->config['application_key']}");
-        curl_setopt_array($curl,[
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => '',
-            CURLOPT_HTTPHEADER => ($this->headers),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLINFO_HEADER_OUT => true
-        ]);
+        // $this->headers([
+        //     "accept"            => "application/json",
+        //     // "Content-Type"      => "application/json",
+        //     // "Authorization"     => "Bearer " . $this->getToken()->access_token,
+        //     // "X-Developer-Application-Key" => $this->config['application_key']
+        // ]);
+        // //falta colocar produção
+        // $curl = curl_init("https://api.hm.bb.com.br/testes-portal-desenvolvedor/v1/boletos-cobranca/{$linhaDigitavel}/pagar?gw-app-key={$this->config['application_key']}");
+        // curl_setopt_array($curl,[
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_MAXREDIRS => 10,
+        //     CURLOPT_TIMEOUT => 30,
+        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //     CURLOPT_CUSTOMREQUEST => "POST",
+        //     CURLOPT_POSTFIELDS => '',
+        //     CURLOPT_HTTPHEADER => ($this->headers),
+        //     CURLOPT_SSL_VERIFYPEER => false,
+        //     CURLINFO_HEADER_OUT => true
+        // ]);
         
-        $pagarBoletoLinha = json_decode(curl_exec($curl));        
-        return $pagarBoletoLinha;
+        // $pagarBoletoLinha = json_decode(curl_exec($curl));        
+        // return $pagarBoletoLinha;
     }
 
     public function pagarBoletoPix(string $pix){
-        $this->headers([
-            "Content-Type"      => "application/json",
-            "accept"            => "application/json",
-            // "Authorization"     => "Bearer " . $this->getToken()->access_token,
-            // "X-Developer-Application-Key" => $this->config['application_key']
-        ]);
-        //falta colocar produção
-        $curl = curl_init("https://api.hm.bb.com.br/testes-portal-desenvolvedor/v1/boletos-pix/pagar?gw-app-key={$this->config['application_key']}");
-        curl_setopt_array($curl,[
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => '{
-                "pix": "00020101021226870014br.gov.bcb.pix2565qrcodepix-h.bb.com.br/pix/v2/c8ecd24d-f648-44ff-b568-6806fbd3d01a5204000053039865802BR5920ALAN GUIACHERO BUENO6008BRASILIA62070503***6304072C"
-              ',
-            CURLOPT_HTTPHEADER => ($this->headers),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLINFO_HEADER_OUT => true
-        ]);
+        // $this->headers([
+        //     "Content-Type"      => "application/json",
+        //     "accept"            => "application/json",
+        //     // "Authorization"     => "Bearer " . $this->getToken()->access_token,
+        //     // "X-Developer-Application-Key" => $this->config['application_key']
+        // ]);
+        // //falta colocar produção
+        // $curl = curl_init("https://api.hm.bb.com.br/testes-portal-desenvolvedor/v1/boletos-pix/pagar?gw-app-key={$this->config['application_key']}");
+        // curl_setopt_array($curl,[
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_MAXREDIRS => 10,
+        //     CURLOPT_TIMEOUT => 30,
+        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //     CURLOPT_CUSTOMREQUEST => "POST",
+        //     CURLOPT_POSTFIELDS => '{
+        //         "pix": "00020101021226870014br.gov.bcb.pix2565qrcodepix-h.bb.com.br/pix/v2/c8ecd24d-f648-44ff-b568-6806fbd3d01a5204000053039865802BR5920ALAN GUIACHERO BUENO6008BRASILIA62070503***6304072C"
+        //       ',
+        //     CURLOPT_HTTPHEADER => ($this->headers),
+        //     CURLOPT_SSL_VERIFYPEER => false,
+        //     CURLINFO_HEADER_OUT => true
+        // ]);
         
-        $pagarBoletoPix = json_decode(curl_exec($curl));        
-        return $pagarBoletoPix;
+        // $pagarBoletoPix = json_decode(curl_exec($curl));        
+        // return $pagarBoletoPix;
     }
     ######################################################
     ############## FIM - PAGAMENTOS ######################
@@ -480,48 +480,48 @@ class BankingBB{
     ############## QRCODES ###############################
     ######################################################
     public function gerarQRCode(string $pix){
-        $this->headers([
-            "Content-Type"      => "application/json",
-            "accept"            => "application/json",
-            "Authorization"     => "Bearer " . $this->getToken()->access_token,
-            "X-Developer-Application-Key" => $this->config['application_key']
-        ]);
-        //falta colocar produção
-        $curl = curl_init("https://api.sandbox.bb.com.br/pix-bb/v1/arrecadacao-qrcodes?gw-dev-app-key={$this->config['application_key']}");
-        curl_setopt_array($curl,[
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => '{
-                "numeroConvenio": 62191,
-                "indicadorCodigoBarras": "S",
-                "codigoGuiaRecebimento": "83660000000199800053846101173758000000000000",
-                "emailDevedor": "contribuinte.silva@provedor.com.br",
-                "codigoPaisTelefoneDevedor": 55,
-                "dddTelefoneDevedor": 61,
-                "numeroTelefoneDevedor": "999731240",
-                "codigoSolicitacaoBancoCentralBrasil": "88a33759-78b0-43b7-8c60-e5e3e7cb55fe",
-                "descricaoSolicitacaoPagamento": "Arrecadação Pix",
-                "valorOriginalSolicitacao": 19.98,
-                "cpfDevedor": "19917885250",
-                "nomeDevedor": "Contribuinte da Silva",
-                "quantidadeSegundoExpiracao": 3600,
-                "listaInformacaoAdicional": [
-                  {
-                    "codigoInformacaoAdicional": "IPTU",
-                    "textoInformacaoAdicional": "COTA ÚNICA 2021"
-                  }
-                ]
-              }',
-            CURLOPT_HTTPHEADER => ($this->headers),
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLINFO_HEADER_OUT => true
-        ]);
+        // $this->headers([
+        //     "Content-Type"      => "application/json",
+        //     "accept"            => "application/json",
+        //     "Authorization"     => "Bearer " . $this->getToken()->access_token,
+        //     "X-Developer-Application-Key" => $this->config['application_key']
+        // ]);
+        // //falta colocar produção
+        // $curl = curl_init("https://api.sandbox.bb.com.br/pix-bb/v1/arrecadacao-qrcodes?gw-dev-app-key={$this->config['application_key']}");
+        // curl_setopt_array($curl,[
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_MAXREDIRS => 10,
+        //     CURLOPT_TIMEOUT => 30,
+        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //     CURLOPT_CUSTOMREQUEST => "POST",
+        //     CURLOPT_POSTFIELDS => '{
+        //         "numeroConvenio": 62191,
+        //         "indicadorCodigoBarras": "S",
+        //         "codigoGuiaRecebimento": "83660000000199800053846101173758000000000000",
+        //         "emailDevedor": "contribuinte.silva@provedor.com.br",
+        //         "codigoPaisTelefoneDevedor": 55,
+        //         "dddTelefoneDevedor": 61,
+        //         "numeroTelefoneDevedor": "999731240",
+        //         "codigoSolicitacaoBancoCentralBrasil": "88a33759-78b0-43b7-8c60-e5e3e7cb55fe",
+        //         "descricaoSolicitacaoPagamento": "Arrecadação Pix",
+        //         "valorOriginalSolicitacao": 19.98,
+        //         "cpfDevedor": "19917885250",
+        //         "nomeDevedor": "Contribuinte da Silva",
+        //         "quantidadeSegundoExpiracao": 3600,
+        //         "listaInformacaoAdicional": [
+        //           {
+        //             "codigoInformacaoAdicional": "IPTU",
+        //             "textoInformacaoAdicional": "COTA ÚNICA 2021"
+        //           }
+        //         ]
+        //       }',
+        //     CURLOPT_HTTPHEADER => ($this->headers),
+        //     CURLOPT_SSL_VERIFYPEER => false,
+        //     CURLINFO_HEADER_OUT => true
+        // ]);
         
-        $gerarQRCode = json_decode(curl_exec($curl));        
-        return $gerarQRCode;
+        // $gerarQRCode = json_decode(curl_exec($curl));        
+        // return $gerarQRCode;
     }
     ######################################################
     ############## FIM - QRCODES #########################
