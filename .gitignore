@@ -1,3 +1,7 @@
 /vendor
 composer.lock
 /src/BankingBB copy.php
+/docs/COBRANÇAS/BoletoBB.zip
+/docs/COBRANÇAS/Boleto Em PDF/vendor
+/docs/COBRANÇAS/Boleto Em PDF/composer.json
+/docs/COBRANÇAS/Boleto Em PDF/composer.lock
