@@ -206,17 +206,17 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
 
                                     <?php
                                     if (in_array($dadosBoleto->codigoTipoJuroMora, [1, 2])) {
-                                        
-                                        $dataMora = str_replace('.', '/', $dadosBoleto->dataMultaTitulo);
+
+                                        $dataVencimento = str_replace('.', '/', $dadosBoleto->dataVencimentoTituloCobranca);
                                         $msgMora = '';
                                         if ($dadosBoleto->codigoTipoJuroMora == 1 && $dadosBoleto->valorJuroMoraTitulo > 0) {
                                             $mora = number_format($dadosBoleto->valorJuroMoraTitulo, 2, ',', '.');
-                                            $msgMora = "A partir de $dataMora, mora diária de R$ $mora.";
+                                            $msgMora = "Depois de $dataVencimento, mora diária de R$ $mora.";
                                         }
 
                                         if ($dadosBoleto->codigoTipoJuroMora == 2 && $dadosBoleto->percentualJuroMoraTitulo > 0) {
                                             $mora = number_format(($dadosBoleto->valorAtualTituloCobranca * $dadosBoleto->percentualJuroMoraTitulo) / 100, 2, ',', '.');
-                                            $msgMora = "A partir de $dataMora, mora mensal de R$ $mora.";
+                                            $msgMora = "Depois de $dataVencimento, mora mensal de R$ $mora.";
                                         }
                                         ?>
                                         <?= $msgMora ?><br>
