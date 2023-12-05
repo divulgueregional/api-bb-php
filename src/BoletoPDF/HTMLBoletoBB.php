@@ -8,24 +8,25 @@ $base64LogoBB = 'iVBORw0KGgoAAAANSUhEUgAAAiAAAABcCAMAAABgKP69AAABJlBMVEX53RgAOKn
 $generator = new BarcodeGeneratorHTML();
 $barcode = $generator->getBarcode($dadosBoleto->textoCodigoBarrasTituloCobranca, BarcodeGeneratorHTML::TYPE_INTERLEAVED_2_5, 2, 70);
 echo '<title>Boleto Banco do Brasil</title>';
-foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
 ?>
-    <div class="boleto">
-        <?php if (!empty($dadosBoleto->qrCode) && !empty($dadosBoleto->qrCode->emv)) : ?>
-            <table width="100%" style="border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; padding-top: 0;margin-bottom: 0;padding-bottom: 0; height: 70px">
-                <tr>
 
-                    <td style="width: 80px;vertical-align: middle;">
-                        <img width="70" height="70" src="data:image/png;base64, <?= base64_encode(QrCode::size(50)->generate($dadosBoleto->qrCode->emv)->toHtml()) ?>">
-                    </td>
-                    <td style="vertical-align: middle;">
-                        Pague sua cobrança via Pix, o recebimento é
-                        instantâneo.<br>
-                        <span style="font-size:10pt">Leia o QR Code no aplicativo do seu banco.</span>
-                    </td>
-                </tr>
-            </table>
-        <?php endif; ?>
+<?php if (!empty($dadosBoleto->qrCode) && !empty($dadosBoleto->qrCode->emv)) : ?>
+    <table width="100%" style="border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; padding-top: 0;margin-bottom: 0;padding-bottom: 0; height: 70px; margin-top:10px; margin-bottom:10px">
+        <tr>
+
+            <td style="width: 80px;vertical-align: middle;">
+                <img width="70" height="70" src="data:image/png;base64, <?= base64_encode(QrCode::size(50)->generate($dadosBoleto->qrCode->emv)->toHtml()) ?>">
+            </td>
+            <td style="vertical-align: middle;">
+                Pague sua cobrança via Pix, o recebimento é
+                instantâneo.<br>
+                <span style="font-size:10pt">Leia o QR Code no aplicativo do seu banco.</span>
+            </td>
+        </tr>
+    </table>
+<?php endif; ?>
+<?php foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) { ?>
+    <div class="boleto">
 
         <!--Bloco A-->
         <table>
@@ -175,7 +176,7 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
                         <div class="info_campo"></div>
                     </div>
                 </td>
-                <td style="width: 0%;">
+                <td>
                     <div class="div_campo_info altura_fixa_28">
                         <div class="titulo_campo azul">(=) Valor do documento</div>
                         <div class="info_campo">R$ <?= number_format($dadosBoleto->valorAtualTituloCobranca ?? '0', 2, ',', '.') ?></div>
@@ -186,12 +187,12 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
         <!--Fim Bloco E-->
 
 
-        <table style="border-collapse:unset; border: none">
+        <table style="border-collapse:unset; border: none;">
             <tr>
-                <td style="width: 69.87%;">
+                <td class="alinhar_top" style="width: 69.87%; border-bottom: 1px black solid;">
 
                     <!--Instruções do boleto-->
-                    <table class="table_bloco" style="border-collapse:unset">
+                    <table class="table_bloco" style="border-collapse:unset; border: none;">
                         <tr class="alinhar_top">
                             <td>
                                 <div class="titulo_campo azul">Instruções</div>
@@ -245,7 +246,7 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
                     <!-- Fim Instruções do boleto-->
 
                 </td>
-                <td style="width: 0%;" class="alinhar_top">
+                <td class="alinhar_top" style="border-bottom: 1px black solid;">
 
                     <!--Bloco F-->
                     <table class="table_bloco border_collapse">
@@ -299,7 +300,7 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
 
 
                     <!--Bloco H-->
-                    <table class="table_bloco border_collapse">
+                    <table class="table_bloco border_collapse" style="border: none;">
                         <tr>
                             <td class="fundo_amarelo_claro">
                                 <div class="div_campo_info altura_fixa_28">
@@ -336,10 +337,11 @@ foreach (($dadosBoleto->gerarDuasVias ? [1, 2] : [1]) as $viaAtual) {
 
         <!--Bloco J-->
         <div class="titulo_campo azul alinhar_direta">Autenticação mecânica</div>
-        <?php
-        $exibirCodBarras = (!$dadosBoleto->gerarDuasVias || $viaAtual == 2);
-        echo ($exibirCodBarras ? $barcode : '');
-        ?>
+        <?php if (!$dadosBoleto->gerarDuasVias || $viaAtual == 2) { ?>
+            <div style="position: absolute; bottom: 0">
+                <?= $barcode ?>
+            </div>
+        <?php } ?>
         <!--Fim Bloco J-->
 
         <?php if ($dadosBoleto->gerarDuasVias && $viaAtual == 1) { ?>
