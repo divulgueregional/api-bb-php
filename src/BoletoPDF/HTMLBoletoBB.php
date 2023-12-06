@@ -59,7 +59,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                 <td style="width: 30%;" class="fundo_amarelo_claro">
                     <div class="div_campo_info altura_fixa_28">
                         <div class="titulo_campo azul">Vencimento</div>
-                        <div class="info_campo"><?= ($dadosBoleto->dataVencimentoTituloCobranca ?? '') ?></div>
+                        <div class="info_campo alinhar_direta"><?= ($dadosBoleto->dataVencimentoTituloCobranca ?? '') ?></div>
                     </div>
                 </td>
 
@@ -81,7 +81,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                 <td style="width: 30%;">
                     <div class="div_campo_info altura_fixa_28">
                         <div class="titulo_campo azul">Agência/Código do cedente </div>
-                        <div class="info_campo"><?= ($dadosBoleto->agencia ?? '') ?>/<?= ($dadosBoleto->codigoCedente ?? '') ?></div>
+                        <div class="info_campo alinhar_direta"><?= ($dadosBoleto->agencia ?? '') ?>/<?= ($dadosBoleto->codigoCedente ?? '') ?></div>
                     </div>
                 </td>
             </tr>
@@ -128,7 +128,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                 <td style="width: 27.9%;">
                     <div class="div_campo_info altura_fixa_28">
                         <div class="titulo_campo azul">Nosso número </div>
-                        <div class="info_campo"><?= ($dadosBoleto->nossoNumero ?? '') ?></div>
+                        <div class="info_campo alinhar_direta"><?= ($dadosBoleto->nossoNumero ?? '') ?></div>
                     </div>
                 </td>
             </tr>
@@ -179,7 +179,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                 <td>
                     <div class="div_campo_info altura_fixa_28">
                         <div class="titulo_campo azul">(=) Valor do documento</div>
-                        <div class="info_campo">R$ <?= number_format($dadosBoleto->valorAtualTituloCobranca ?? '0', 2, ',', '.') ?></div>
+                        <div class="info_campo alinhar_direta">R$ <?= number_format($dadosBoleto->valorAtualTituloCobranca ?? '0', 2, ',', '.') ?></div>
                     </div>
                 </td>
             </tr>
@@ -254,7 +254,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                             <td>
                                 <div class="div_campo_info altura_fixa_28">
                                     <div class="titulo_campo azul">(-) Desconto/Abatimento</div>
-                                    <div class="info_campo"> </div>
+                                    <div class="info_campo alinhar_direta"> </div>
                                 </div>
                             </td>
                         </tr>
@@ -280,7 +280,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                             <td>
                                 <div class="div_campo_info altura_fixa_28">
                                     <div class="titulo_campo azul">(+) Juros/Multa</div>
-                                    <div class="info_campo"></div>
+                                    <div class="info_campo alinhar_direta"></div>
                                 </div>
                             </td>
                         </tr>
@@ -305,7 +305,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                             <td class="fundo_amarelo_claro">
                                 <div class="div_campo_info altura_fixa_28">
                                     <div class="titulo_campo azul">(=) Valor cobrado</div>
-                                    <div class="info_campo">R$ <?= number_format($dadosBoleto->valorAtualTituloCobranca ?? '0', 2, ',', '.') ?></div>
+                                    <div class="info_campo alinhar_direta">R$ <?= number_format($dadosBoleto->valorAtualTituloCobranca ?? '0', 2, ',', '.') ?></div>
                                 </div>
                             </td>
                         </tr>
