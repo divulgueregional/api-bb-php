@@ -16,6 +16,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "guzzlehttp/guzzle": "^7.0"
+        "guzzlehttp/guzzle": "^7.0",
+        "simplesoftwareio/simple-qrcode": "^4.2",
+        "picqer/php-barcode-generator": "^2.4"
     }
 }
