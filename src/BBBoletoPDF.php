@@ -1,4 +1,5 @@
 <?php
+
 namespace Divulgueregional\apibbphp;
 
 use Dompdf\Dompdf;
@@ -144,9 +145,46 @@ class BBBoletoPDF
             $dadosBoleto->codigoLinhaDigitavel = $this->formatarLinhaDigitavel($dadosBoleto->codigoLinhaDigitavel);
         }
 
-
-
+        $dadosBoleto->instrucoes = $dadosBoleto->instrucoes ?? $this->montarInstrucoes($dadosBoleto);
 
         return $dadosBoleto;
+    }
+
+    private function montarInstrucoes($dadosBoleto)
+    {
+        $instrucoes = [];
+        array_push($instrucoes, 'Pagável em qualquer banco até o vencimento');
+        if (in_array($dadosBoleto->codigoTipoMulta, [1, 2])) {
+            $dataMulta = str_replace('.', '/', $dadosBoleto->dataMultaTitulo);
+            $msgMulta = '';
+            if ($dadosBoleto->codigoTipoMulta == 1 && $dadosBoleto->valorMultaTituloCobranca > 0) {
+                $multa = number_format($dadosBoleto->valorMultaTituloCobranca, 2, ',', '.');
+                $msgMulta = "Em $dataMulta, multa de R$ $multa.";
+            }
+
+            if ($dadosBoleto->codigoTipoMulta == 2 && $dadosBoleto->percentualMultaTitulo > 0) {
+                $multa = number_format(($dadosBoleto->valorAtualTituloCobranca * $dadosBoleto->percentualMultaTitulo) / 100, 2, ',', '.');
+                $msgMulta = "Em $dataMulta, multa de $dadosBoleto->percentualMultaTitulo%, R$ $multa.";
+            }
+            array_push($instrucoes, $msgMulta);
+        }
+
+        if (in_array($dadosBoleto->codigoTipoJuroMora, [1, 2])) {
+
+            $dataMora = str_replace('.', '/', $dadosBoleto->dataMultaTitulo);
+            $msgMora = '';
+            if ($dadosBoleto->codigoTipoJuroMora == 1 && $dadosBoleto->valorJuroMoraTitulo > 0) {
+                $mora = number_format($dadosBoleto->valorJuroMoraTitulo, 2, ',', '.');
+                $msgMora = "A partir de $dataMora, mora diária de R$ $mora.";
+            }
+
+            if ($dadosBoleto->codigoTipoJuroMora == 2 && $dadosBoleto->percentualJuroMoraTitulo > 0) {
+                $mora = number_format(($dadosBoleto->valorAtualTituloCobranca * $dadosBoleto->percentualJuroMoraTitulo) / 100, 2, ',', '.');
+                $msgMora = "A partir de $dataMora, mora mensal de R$ $mora.";
+            }
+            array_push($instrucoes, $msgMora);
+        }
+
+        return $instrucoes;
     }
 }
