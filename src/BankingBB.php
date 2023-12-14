@@ -2,13 +2,18 @@
 
 namespace Divulgueregional\apibbphp;
 
+use Divulgueregional\ApiBbPhp\Exceptions\InternalServerErrorException;
+use Divulgueregional\ApiBbPhp\Exceptions\InvalidRequestException;
+use Divulgueregional\ApiBbPhp\Exceptions\ServiceUnavailableException;
+use Divulgueregional\ApiBbPhp\Exceptions\UnauthorizedException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Message;
 use JetBrains\PhpStorm\NoReturn;
 
-class BankingBB{
+class BankingBB
+{
     protected $urlToken;
     protected $header;
     protected $token;
@@ -27,13 +32,13 @@ class BankingBB{
     function __construct($config)
     {
         $this->config = $config;
-        if($config['endPoints']==1){
+        if ($config['endPoints'] == 1) {
             $this->urls = 'https://api.bb.com.br/cobrancas/v2';
             $this->urlToken = 'https://oauth.bb.com.br/oauth/token';
             //GuzzleHttp
             $this->uriToken = 'https://oauth.bb.com.br/oauth/token';
             $this->uriCobranca = 'https://api.bb.com.br';
-        }else{
+        } else {
             $this->urls = 'https://api.sandbox.bb.com.br/cobrancas/v2';
             $this->urlToken = 'https://oauth.sandbox.bb.com.br/oauth/token';
             //GuzzleHttp
@@ -46,12 +51,12 @@ class BankingBB{
         $this->clientCobranca = new Client([
             'base_uri' => $this->uriCobranca,
         ]);
-        
+
         //startar o token
-        if(isset($this->config['token'])){
-            if($this->config['token'] !=''){
+        if (isset($this->config['token'])) {
+            if ($this->config['token'] != '') {
                 $this->setToken($this->config['token']);
-            }else{
+            } else {
                 $this->gerarToken();
             }
         }
@@ -61,7 +66,8 @@ class BankingBB{
     ############## TOKEN #################################
     ######################################################
 
-    public function gerarToken(){
+    public function gerarToken()
+    {
         try {
             $response = $this->clientToken->request(
                 'POST',
@@ -70,7 +76,7 @@ class BankingBB{
                     'headers' => [
                         'Accept' => '*/*',
                         'Content-Type' => 'application/x-www-form-urlencoded',
-                        'Authorization' => 'Basic '. base64_encode($this->config['client_id'].':'.$this->config['client_secret']).''
+                        'Authorization' => 'Basic ' . base64_encode($this->config['client_id'] . ':' . $this->config['client_secret']) . ''
                     ],
                     'verify' => false,
                     'form_params' => [
@@ -89,32 +95,41 @@ class BankingBB{
         }
     }
 
-    public function setToken(string $token){
+    public function setToken(string $token)
+    {
         $this->token = $token;
     }
 
-    public function getToken(){
+    public function getToken()
+    {
         return $this->token;
     }
 
-    protected function fields(array $fields, string $format="json"): void {
-        if($format == "json") {
+    protected function fields(array $fields, string $format = "json"): void
+    {
+        if ($format == "json") {
             $this->fields = (!empty($fields) ? json_encode($fields) : null);
         }
-        if($format == "query"){
+        if ($format == "query") {
             $this->fields = (!empty($fields) ? http_build_query($fields) : null);
         }
     }
 
-    protected function headers(array $headers): void {
-        if (!$headers) { return; }
+    protected function headers(array $headers): void
+    {
+        if (!$headers) {
+            return;
+        }
         foreach ($headers as $k => $v) {
-            $this->header($k,$v);
+            $this->header($k, $v);
         }
     }
-    
-    protected function header(string $key, string $value): void {
-        if(!$key || is_int($key)){ return; }
+
+    protected function header(string $key, string $value): void
+    {
+        if (!$key || is_int($key)) {
+            return;
+        }
         $keys = filter_var($key, FILTER_SANITIZE_STRIPPED);
         $values = filter_var($value, FILTER_SANITIZE_STRIPPED);
         $this->headers[] = "{$keys}: {$values}";
@@ -126,7 +141,9 @@ class BankingBB{
     ######################################################
     ############## COBRANÇAS #############################
     ######################################################
-    public function registrarBoleto(array $fields){
+    public function registrarBoleto(array $fields)
+    {
+        $filters = [];
         try {
             $response = $this->clientCobranca->request(
                 'POST',
@@ -135,7 +152,7 @@ class BankingBB{
                     'headers' => [
                         'Content-Type' => 'application/json',
                         'X-Developer-Application-Key' => $this->config['application_key'],
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -148,19 +165,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = json_decode($response->getBody()->getContents());
-            if($responseBodyAsString==''){
-                return ($response);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
             }
-            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao incluir Boleto Cobranca: {$response}"];
         }
     }
 
-    public function alterarBoleto(string $id, array $fields){
+    public function alterarBoleto(string $id, array $fields)
+    {
         try {
             $response = $this->clientCobranca->request(
                 'PATCH',
@@ -169,8 +208,8 @@ class BankingBB{
                     'headers' => [
                         'accept' => 'application/json',
                         'Content-Type' => 'application/json',
-                        // 'X-Developer-Application-Key' => $this->config['application_key'],
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'X-Developer-Application-Key' => $this->config['application_key'],
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -183,16 +222,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = json_decode($response->getBody()->getContents());
-            return ($responseBodyAsString);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao alterar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function detalheDoBoleto(string $id){
+    public function detalheDoBoleto(string $id)
+    {
         try {
             $response = $this->clientCobranca->request(
                 'GET',
@@ -200,7 +264,7 @@ class BankingBB{
                 [
                     'headers' => [
                         'X-Developer-Application-Key' => $this->config['application_key'],
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -212,16 +276,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = json_decode($response->getBody()->getContents());
-            return ($responseBodyAsString);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao detalhar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function listarBoletos($filters){
+    public function listarBoletos($filters)
+    {
         try {
             $response = $this->clientCobranca->request(
                 'GET',
@@ -229,7 +318,7 @@ class BankingBB{
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -237,9 +326,9 @@ class BankingBB{
                         'indicadorSituacao' => $filters['indicadorSituacao'],
                         'agenciaBeneficiario' => $filters["agenciaBeneficiario"],
                         'contaBeneficiario' => $filters["contaBeneficiario"],
-                        'cnpjPagador'=> '',
-                        'digitoCNPJPagador'=> '',
-                        'digitoCNPJPagador'=> '',
+                        'cnpjPagador' => '',
+                        'digitoCNPJPagador' => '',
+                        'digitoCNPJPagador' => '',
                         'codigoEstadoTituloCobranca' => $filters['codigoEstadoTituloCobranca'],
                         'boletoVencido' => $filters['boletoVencido'],
                     ],
@@ -249,14 +338,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function baixarBoleto(string $id){
+    public function baixarBoleto(string $id)
+    {
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -266,7 +382,7 @@ class BankingBB{
                     'headers' => [
                         'Content-Type' => 'application/json',
                         'X-Developer-Application-Key' => $this->config['application_key'],
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'body' => json_encode($fields),
@@ -276,19 +392,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = json_decode($response->getBody()->getContents());
-            if($responseBodyAsString==''){
-                return ($response);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
             }
-            return ($responseBodyAsString);
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function consultaPixBoleto(string $id){
+    public function consultaPixBoleto(string $id)
+    {
         try {
             $response = $this->clientCobranca->request(
                 'GET',
@@ -296,7 +434,7 @@ class BankingBB{
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -309,14 +447,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function cancelarPixBoleto(string $id){
+    public function cancelarPixBoleto(string $id)
+    {
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -326,7 +491,7 @@ class BankingBB{
                     'headers' => [
                         'accept' => 'application/json',
                         'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->token.''
+                        'Authorization' => 'Bearer ' . $this->token . ''
                     ],
                     'verify' => false,
                     'query' => [
@@ -339,14 +504,41 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
     }
-    
-    public function gerarPixBoleto(string $id){
+
+    public function gerarPixBoleto(string $id)
+    {
         $fields['numeroConvenio'] = $this->config['numeroConvenio'];
         try {
             $response = $this->clientCobranca->request(
@@ -354,7 +546,7 @@ class BankingBB{
                 "/cobrancas/v2/boletos/{$id}/gerar-pix",
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->token.'',
+                        'Authorization' => 'Bearer ' . $this->token . '',
                         'accept' => 'application/json',
                         'Content-Type' => 'application/json',
                         // 'X-Developer-Application-Key' => $this->config['application_key'],
@@ -370,24 +562,51 @@ class BankingBB{
             $result = json_decode($response->getBody()->getContents());
             return array('status' => $statusCode, 'response' => $result);
         } catch (ClientException $e) {
-            return ($e);
+            $statusCode = $e->getResponse()->getStatusCode();
+            $requestParameters = $e->getRequest();
+            $bodyContent = json_decode($e->getResponse()->getBody()->getContents());
+
+            switch ($statusCode) {
+                case InvalidRequestException::HTTP_STATUS_CODE:
+                    $exception = new InvalidRequestException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case UnauthorizedException::HTTP_STATUS_CODE:
+                    $exception = new UnauthorizedException($bodyContent->message);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case InternalServerErrorException::HTTP_STATUS_CODE:
+                    $exception = new InternalServerErrorException($bodyContent->erros[0]->mensagem);
+                    $exception->setRequestParameters($requestParameters);
+                    $exception->setBodyContent($bodyContent);
+                    throw $exception;
+                case ServiceUnavailableException::HTTP_STATUS_CODE:
+                    $exception = new ServiceUnavailableException("SERVIÇO INDISPONÍVEL");
+                    $exception->setRequestParameters($requestParameters);
+                    throw $exception;
+                default:
+                    throw $e;
+            }
         } catch (\Exception $e) {
             $response = $e->getMessage();
             return ['error' => "Falha ao baixar Boleto Cobranca: {$response}"];
         }
     }
 
-    public function gerarPixBoleto2(string $id, array $fields){
+    public function gerarPixBoleto2(string $id, array $fields)
+    {
         $this->headers([
             "Authorization"     => "Bearer " . $this->token,
             "accept"      => "application/json",
             "Content-Type"      => "application/json",
             // "X-Developer-Application-Key" => $this->config['application_key']
         ]);
-        $this->fields($fields,'json');
+        $this->fields($fields, 'json');
 
         $curl = curl_init("https://api.sandbox.bb.com.br/cobrancas/v2/boletos/00031285570000150024/gerar-pix?gw-dev-app-key=d27be77909ffab001369e17d80050056b9b1a5b0");
-        curl_setopt_array($curl,[
+        curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
@@ -400,7 +619,7 @@ class BankingBB{
             CURLOPT_SSL_VERIFYPEER => false,
             CURLINFO_HEADER_OUT => true
         ]);
-        
+
         $gerarPixBoleto = json_decode(curl_exec($curl));
         return $gerarPixBoleto;
     }
@@ -420,7 +639,8 @@ class BankingBB{
     ######################################################
     ############## PAGAMENTOS ############################
     ######################################################
-    public function pagarBoletoLinha(string $linhaDigitavel){
+    public function pagarBoletoLinha(string $linhaDigitavel)
+    {
         // $this->headers([
         //     "accept"            => "application/json",
         //     // "Content-Type"      => "application/json",
@@ -440,12 +660,13 @@ class BankingBB{
         //     CURLOPT_SSL_VERIFYPEER => false,
         //     CURLINFO_HEADER_OUT => true
         // ]);
-        
-        // $pagarBoletoLinha = json_decode(curl_exec($curl));        
+
+        // $pagarBoletoLinha = json_decode(curl_exec($curl));
         // return $pagarBoletoLinha;
     }
 
-    public function pagarBoletoPix(string $pix){
+    public function pagarBoletoPix(string $pix)
+    {
         // $this->headers([
         //     "Content-Type"      => "application/json",
         //     "accept"            => "application/json",
@@ -467,8 +688,8 @@ class BankingBB{
         //     CURLOPT_SSL_VERIFYPEER => false,
         //     CURLINFO_HEADER_OUT => true
         // ]);
-        
-        // $pagarBoletoPix = json_decode(curl_exec($curl));        
+
+        // $pagarBoletoPix = json_decode(curl_exec($curl));
         // return $pagarBoletoPix;
     }
     ######################################################
@@ -479,7 +700,8 @@ class BankingBB{
     ######################################################
     ############## QRCODES ###############################
     ######################################################
-    public function gerarQRCode(string $pix){
+    public function gerarQRCode(string $pix)
+    {
         // $this->headers([
         //     "Content-Type"      => "application/json",
         //     "accept"            => "application/json",
@@ -519,12 +741,11 @@ class BankingBB{
         //     CURLOPT_SSL_VERIFYPEER => false,
         //     CURLINFO_HEADER_OUT => true
         // ]);
-        
-        // $gerarQRCode = json_decode(curl_exec($curl));        
+
+        // $gerarQRCode = json_decode(curl_exec($curl));
         // return $gerarQRCode;
     }
     ######################################################
     ############## FIM - QRCODES #########################
     ######################################################
-
 }
