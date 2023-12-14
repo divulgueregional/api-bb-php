@@ -199,7 +199,7 @@ echo '<title>Boleto Banco do Brasil</title>';
                                 <div style="height: 93px;overflow: hidden;" class="info_campo">
                                     <?php
                                     foreach ($dadosBoleto->instrucoes as $instrucao) {
-                                    ?>
+                                        ?>
                                         <?= $instrucao ?><br>
                                     <?php } ?>
                                 </div>
@@ -316,5 +316,5 @@ echo '<title>Boleto Banco do Brasil</title>';
             <br>
         <?php } ?>
     </div>
-<?php
+    <?php
 }
