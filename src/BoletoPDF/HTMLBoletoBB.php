@@ -197,48 +197,11 @@ echo '<title>Boleto Banco do Brasil</title>';
                             <td>
                                 <div class="titulo_campo azul">Instruções</div>
                                 <div style="height: 93px;overflow: hidden;" class="info_campo">
-                                    Pagável em qualquer banco até o vencimento
-                                    <br>
-                                    <?= $dadosBoleto->textoMensagemBloquetoTitulo ?>
-
                                     <?php
-                                    if (in_array($dadosBoleto->codigoTipoMulta, [1, 2])) {
-                                        $dataMulta = str_replace('.', '/', $dadosBoleto->dataMultaTitulo);
-                                        $msgMulta = '';
-                                        if ($dadosBoleto->codigoTipoMulta == 1 && $dadosBoleto->valorMultaTituloCobranca > 0) {
-                                            $multa = number_format($dadosBoleto->valorMultaTituloCobranca, 2, ',', '.');
-                                            $msgMulta = "Em $dataMulta, multa de R$ $multa.";
-                                        }
-
-                                        if ($dadosBoleto->codigoTipoMulta == 2 && $dadosBoleto->percentualMultaTitulo > 0) {
-                                            $multa = number_format(($dadosBoleto->valorAtualTituloCobranca * $dadosBoleto->percentualMultaTitulo) / 100, 2, ',', '.');
-                                            $msgMulta = "Em $dataMulta, multa de $dadosBoleto->percentualMultaTitulo%, R$ $multa.";
-                                        }
-                                    ?>
-                                        <?= $msgMulta ?><br>
-
+                                    foreach ($dadosBoleto->instrucoes as $instrucao) {
+                                        ?>
+                                        <?= $instrucao ?><br>
                                     <?php } ?>
-
-
-                                    <?php
-                                    if (in_array($dadosBoleto->codigoTipoJuroMora, [1, 2])) {
-
-                                        $dataMora = str_replace('.', '/', $dadosBoleto->dataMultaTitulo);
-                                        $msgMora = '';
-                                        if ($dadosBoleto->codigoTipoJuroMora == 1 && $dadosBoleto->valorJuroMoraTitulo > 0) {
-                                            $mora = number_format($dadosBoleto->valorJuroMoraTitulo, 2, ',', '.');
-                                            $msgMora = "A partir de $dataMora, mora diária de R$ $mora.";
-                                        }
-
-                                        if ($dadosBoleto->codigoTipoJuroMora == 2 && $dadosBoleto->percentualJuroMoraTitulo > 0) {
-                                            $mora = number_format(($dadosBoleto->valorAtualTituloCobranca * $dadosBoleto->percentualJuroMoraTitulo) / 100, 2, ',', '.');
-                                            $msgMora = "A partir de $dataMora, mora mensal de R$ $mora.";
-                                        }
-                                    ?>
-                                        <?= $msgMora ?><br>
-
-                                    <?php } ?>
-
                                 </div>
                             </td>
                         </tr>
@@ -353,5 +316,5 @@ echo '<title>Boleto Banco do Brasil</title>';
             <br>
         <?php } ?>
     </div>
-<?php
+    <?php
 }
